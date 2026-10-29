@@ -10,6 +10,15 @@
 - 环境问题：受限沙箱会阻止 asyncio socketpair 的本机回环连接；允许回环连接后测试通过。不是服务代码阻塞。
 - 限制：Python 3.11 无法安全抢占正在执行的原生线程/GPU kernel。停机期限内结束等待并拒绝剩余请求；容器最终退出由 stop_grace_period 兜底，详见 DESIGN。
 
-## 后续阶段
-2. 模型基准/算子分析/Locust 与 JMeter/资源采样/矩阵扫描/可视化，Docker 与监控配置，设计与操作文档。
-3. 全量验证、真实 CPU 推理与有限时长冒烟，记录真实原始数据及明确未完成的硬件验证。
+## 阶段二：压测、部署与文档（完成）
+- 实现模型批大小基准、CPU/GPU Top 15 和 Chrome trace、Locust 原始逐请求记录、JMeter 场景、进程树资源采样和独立 healthz 探测。
+- 实现模式/批参数/过载/稳定性/A-D 瓶颈扫描、实际测量时长统计、成功 P99、绘图与稳定性趋势分析。
+- 提供 CPU/GPU Dockerfile、Compose、Prometheus、Grafana 自动预置、Linux/Windows CI。
+- 完成中文 README、设计、压测指南、报告模板、面试说明；已下载并校验官方权重（git 忽略）。
+- 验证：`ruff check .`、compileall、Grafana JSON / JMeter XML 解析通过；`pytest -q` **37 passed in 19.33s**。
+- 直接依赖全部来自白名单。Java/JMeter、Docker 和 Linux 诊断命令为外部工具，不额外引入 Python 依赖。
+- 待本地验证：Docker 镜像构建/监控栈、真实 CUDA、JMeter 与 Linux 采样工具。
+
+## 阶段三：真实 CPU 链路与最终验证（进行中）
+- 计划：运行真实 ResNet18 模型基准和算子分析、三模式短时 Locust 压测，保存原始数据与图表；复核实现边界后运行全量检查。
+- 不将短时冒烟升级为长期稳定性或生产性能结论；30 分钟和完整参数矩阵另标待本地验证。

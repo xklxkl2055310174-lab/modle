@@ -1,0 +1,14 @@
+services:
+  inference:
+    build:
+      dockerfile: deploy/Dockerfile.gpu
+    environment:
+      DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
