@@ -25,7 +25,12 @@ class RequestContextMiddleware:
             candidate if re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", candidate) else uuid.uuid4().hex
         )
         state = scope.setdefault("state", {})
-        state.update(request_id=request_id, started=started, timing={}, batch_size=0)
+        state.update(
+            request_id=request_id,
+            started=started,
+            batch_size=0,
+            timing={"queue_ms": None, "preprocess_ms": None, "inference_ms": None},
+        )
         request = Request(scope)
         status, response_started = 500, False
         self.metrics.inflight.inc()

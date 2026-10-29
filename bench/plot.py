@@ -17,10 +17,18 @@ def main():
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     axes[0].bar(summary["case"], summary.success_qps, color="#2563eb")
     axes[0].set_ylabel("Successful requests / second")
-    axes[0].tick_params(axis="x", rotation=80)
+    axes[0].tick_params(axis="x", rotation=30 if len(summary) <= 6 else 80)
     axes[1].scatter(summary.success_qps, summary.accepted_p99_ms, color="#059669")
     for _, row in summary.iterrows():
-        axes[1].annotate(row["case"], (row.success_qps, row.accepted_p99_ms), fontsize=7)
+        rightmost = row.success_qps == summary.success_qps.max()
+        axes[1].annotate(
+            row["case"],
+            (row.success_qps, row.accepted_p99_ms),
+            fontsize=7,
+            xytext=(-6, 6) if rightmost else (6, 6),
+            textcoords="offset points",
+            ha="right" if rightmost else "left",
+        )
     axes[1].set(xlabel="Successful requests / second", ylabel="Successful P99 (ms)")
     fig.suptitle("Measured throughput / tail latency (see environment.json)")
     fig.tight_layout()

@@ -6,6 +6,7 @@
 
 ```bash
 python -m bench.model_benchmark --batches 1,2,4,8,16,32,64 --iterations 20 --warmup 3
+python -m bench.plot_model reports/runs/model
 python -m bench.profile_model --batches 1,16 --iterations 5
 ```
 
@@ -41,6 +42,12 @@ python -m bench.run_matrix --scenario bottlenecks --server-cpus 0,1 --client-cpu
 python -m bench.plot reports/runs/<目录>
 python -m bench.analyze_stability reports/runs/<稳定性目录>/stability
 python -m bench.resources --pid <服务PID> --seconds 60 --output reports/runs/resources.csv
+```
+
+本次 CPU 冒烟报告可以重新从已提交的数据生成：
+
+```bash
+python -m bench.report --model reports/verified/cpu-model --profile reports/verified/cpu-profile --http reports/verified/cpu-http-smoke
 ```
 
 稳定性分析输出 RSS 斜率、首尾内存、每分钟失败率和是否达到 30 分钟。斜率不是内存泄漏证明，需结合分配器缓存、平台监控和多次复测。不能预先宣布“内存不涨”。

@@ -122,8 +122,8 @@ def run_locust(args, env, users, seconds, prefix, cpus):
             stderr=subprocess.STDOUT,
             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
         )
-        set_affinity(process.pid, cpus)
         try:
+            set_affinity(process.pid, cpus)
             result = process.wait(timeout=seconds + 90)
         except BaseException:
             stop_process(process)

@@ -1,4 +1,5 @@
 import io
+import math
 import warnings
 from abc import ABC, abstractmethod
 from typing import Any
@@ -48,7 +49,8 @@ class ModelRunner(ABC):
     def warmup(self) -> None:
         """推理工作线程/进程执行；每个配置的批大小独立预热。"""
         stream = io.BytesIO()
-        Image.new("RGB", (224, 224), (100, 120, 140)).save(stream, format="PNG")
+        side = min(224, math.isqrt(self.settings.max_image_pixels))
+        Image.new("RGB", (side, side), (100, 120, 140)).save(stream, format="PNG")
         sample = self.preprocess(stream.getvalue())
         for size in self.settings.batch_sizes():
             for _ in range(self.settings.warmup_runs):

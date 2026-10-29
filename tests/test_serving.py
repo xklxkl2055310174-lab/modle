@@ -128,3 +128,8 @@ def test_expired_before_preprocess(settings):
     item = work(b"bad")
     item.deadline = time.monotonic() - 1
     assert execute_batch(DummyRunner(settings), [item])[0].status == 504
+
+
+def test_warmup_respects_small_pixel_limit(settings):
+    settings.max_image_pixels = 1
+    DummyRunner(settings).warmup()
