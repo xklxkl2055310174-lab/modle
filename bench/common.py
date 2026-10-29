@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import importlib.metadata
 import json
 import platform
@@ -20,8 +21,13 @@ def environment(settings=None):
             packages[name] = "not installed"
     try:
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        diff = subprocess.check_output(
+            ["git", "diff", "HEAD", "--", "app", "client", "bench", "scripts", "pyproject.toml"]
+        )
+        diff_hash = hashlib.sha256(diff).hexdigest() if diff else None
     except (OSError, subprocess.SubprocessError):
         commit = "unknown"
+        diff_hash = None
     return {
         "time_utc": datetime.now(UTC).isoformat(),
         "platform": platform.platform(),
@@ -31,6 +37,7 @@ def environment(settings=None):
         "memory_bytes": psutil.virtual_memory().total,
         "packages": packages,
         "commit": commit,
+        "uncommitted_source_diff_sha256": diff_hash,
         "settings": settings.model_dump() if settings else {},
     }
 

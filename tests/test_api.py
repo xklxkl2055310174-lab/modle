@@ -123,3 +123,40 @@ async def test_missing_form_and_invalid_request_id(settings):
         r = await client.post("/v1/models/dummy/predict", headers={"X-Request-ID": "a" * 200})
         assert r.status_code == 400
         assert len(r.headers["X-Request-ID"]) == 32
+
+
+async def test_chunked_body_limit_and_slow_upload(settings):
+    settings.max_upload_bytes = 10
+
+    async def oversized():
+        yield b"x" * 40000
+        yield b"x" * 40000
+
+    async def slow():
+        await asyncio.sleep(0.1)
+        yield b"x"
+
+    async with client_for(settings) as (_, client):
+        r = await client.post("/v1/models/dummy/predict", content=oversized())
+        assert r.status_code == 413
+        r = await client.post(
+            "/v1/models/dummy/predict", content=slow(), headers={"X-Timeout-Ms": "10"}
+        )
+        assert r.status_code == 504
+
+
+async def test_real_image_format_and_pixel_limit(settings):
+    import io
+
+    from PIL import Image
+
+    settings.max_image_pixels = 224 * 224
+    async with client_for(settings) as (_, client):
+        for size, fmt in [((225, 225), "PNG"), ((16, 16), "GIF")]:
+            stream = io.BytesIO()
+            Image.new("RGB", size).save(stream, fmt)
+            r = await client.post(
+                "/v1/models/dummy/predict",
+                files={"file": ("fake.jpg", stream.getvalue(), "image/jpeg")},
+            )
+            assert r.status_code == 400

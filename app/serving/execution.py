@@ -74,6 +74,8 @@ def execute_batch(runner: ModelRunner, items: list[Work]) -> list[Result | Failu
         except Exception as exc:
             elapsed_ms += (time.monotonic() - started) * 1000
             if is_oom(exc) and len(group) > 1:
+                # 释放异常栈持有的设备临时张量后再清缓存，否则拆批仍可能 OOM。
+                exc.__traceback__ = None
                 runner.clear_cache()
                 half = len(group) // 2
                 infer(group[:half], False, elapsed_ms)

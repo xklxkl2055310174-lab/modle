@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Literal
 
+import psutil
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +13,11 @@ def available_cpus(cgroup_root: Path = Path("/sys/fs/cgroup")) -> int:
     count = float(os.cpu_count() or 1)
     if hasattr(os, "sched_getaffinity"):
         count = min(count, len(os.sched_getaffinity(0)))
+    else:
+        try:
+            count = min(count, len(psutil.Process().cpu_affinity()))
+        except (AttributeError, psutil.Error):
+            pass
     roots = [cgroup_root]
     try:
         for line in Path("/proc/self/cgroup").read_text().splitlines():

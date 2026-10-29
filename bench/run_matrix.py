@@ -183,6 +183,8 @@ def main():
         point.mkdir()
         env = {
             **os.environ,
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
             "RATE_LIMIT_QPS": "0",
             "KEY_RATE_LIMIT_QPS": "0",
             "EXP_SYNC_LOG": "0",

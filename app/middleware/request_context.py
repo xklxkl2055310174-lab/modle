@@ -68,9 +68,10 @@ class RequestContextMiddleware:
                             message = await receive()
                             if message["type"] == "http.disconnect":
                                 return
-                            body.extend(message.get("body", b""))
-                            if len(body) > limit:
+                            chunk = message.get("body", b"")
+                            if len(body) + len(chunk) > limit:
                                 raise ServiceError(413, "file_too_large", "上传内容超过大小限制")
+                            body.extend(chunk)
                             if not message.get("more_body", False):
                                 break
                 except TimeoutError as exc:

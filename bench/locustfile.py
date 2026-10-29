@@ -79,10 +79,23 @@ class PredictionUser(HttpUser):
     @task
     def predict(self):
         # 不调用 SDK：关闭自动重试，测量真实服务失败率和延迟。
-        self.client.post(
+        with self.client.post(
             f"/v1/models/{self.model}/predict",
             files={"file": ("sample.png", self.image, "image/png")},
             data={"top_k": "5"},
             name="predict",
             timeout=self.timeout,
-        )
+            catch_response=True,
+        ) as response:
+            if response.status_code == 200:
+                try:
+                    body = response.json()
+                    if (
+                        len(body["predictions"]) != 5
+                        or body["batch_size"] < 1
+                        or not body["request_id"]
+                        or "total_ms" not in body["timing"]
+                    ):
+                        response.failure("预测响应格式错误")
+                except (ValueError, KeyError, TypeError):
+                    response.failure("预测响应格式错误")
