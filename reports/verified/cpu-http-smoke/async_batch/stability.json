@@ -1,0 +1,8 @@
+{
+  "sampled_seconds": 11.69107174873352,
+  "rss_trend_mib_per_minute": 1.0193778417523396,
+  "rss_first_mib": 393.24609375,
+  "rss_last_mib": 393.57421875,
+  "at_least_30_minutes": false,
+  "interpretation": "结合每分钟错误率、内存曲线与分配器缓存解释；线性斜率不直接证明泄漏。"
+}

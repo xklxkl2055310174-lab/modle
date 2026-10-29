@@ -1,0 +1,7 @@
+{
+  "users": 4,
+  "overrides": {
+    "SERVE_MODE": "threadpool"
+  },
+  "model": "resnet18"
+}
